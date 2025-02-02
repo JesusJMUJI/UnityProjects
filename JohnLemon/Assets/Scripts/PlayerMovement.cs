@@ -13,13 +13,14 @@ public class PlayerMovement : MonoBehaviour
     Vector3 m_Movement;
     Quaternion m_Rotation = Quaternion.identity;
     Rigidbody m_Rigidbody;
+    AudioSource m_AudioSource;
 
     // Start is called before the first frame update
     void Start()
     {
         m_Animator = GetComponent<Animator> ();
         m_Rigidbody = GetComponent<Rigidbody> ();
-
+        m_AudioSource = GetComponent<AudioSource> ();
     }
 
     // Update is called once per frame
