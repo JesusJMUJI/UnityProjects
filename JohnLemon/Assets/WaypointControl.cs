@@ -7,21 +7,58 @@ public class WaypointControl : MonoBehaviour
 {
     public NavMeshAgent agent;
     public Transform[] waypoints;
-    int currentWaypoint = 0;
-    // Start is called before the first frame update
+
+    [SerializeField] private bool isChaserGhost;
+    public Transform playerTransform;
+    public Transform waypoint3Transform;
+    public Observer observer;
+
+    [SerializeField] int currentWaypoint = 0;
+
     void Start()
     {
-        agent.SetDestination(waypoints[0].position);
+        transform.position = waypoint3Transform.position;
     }
 
-    // Update is called once per frame
     void Update()
+    {
+        Debug.Log($"Remaining distance: {agent.remainingDistance}");
+        if(isChaserGhost)
+        {
+            ChaserGhost();
+        }
+        else
+        {
+            Patroller();
+        }
+    }
+
+    void ChaserGhost()
+    {
+        if(agent.pathPending || agent.remainingDistance > 1f)
+        {
+            return;
+        }
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(playerTransform.position, out hit, 10.0f, NavMesh.AllAreas))
+        {
+            observer.transform.gameObject.SetActive(true);
+            agent.SetDestination(playerTransform.position);
+        }
+        else
+        {
+            observer.transform.gameObject.SetActive(false);
+            agent.SetDestination(waypoint3Transform.position);
+        }
+    }
+
+    void Patroller()
     {
         if(agent.remainingDistance < agent.stoppingDistance)
         {
             currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
-            agent.SetDestination (waypoints[currentWaypoint].position);
-
+            agent.SetDestination(waypoints[currentWaypoint].position);
         }
     }
 }
