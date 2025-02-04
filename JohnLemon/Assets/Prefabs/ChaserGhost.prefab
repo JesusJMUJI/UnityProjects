@@ -104,7 +104,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: 563ac48ff656d49478fd93213f4c0eb8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.79
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: 563ac48ff656d49478fd93213f4c0eb8, type: 3}
       propertyPath: m_LocalPosition.y
@@ -112,7 +112,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: 563ac48ff656d49478fd93213f4c0eb8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.94
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: 563ac48ff656d49478fd93213f4c0eb8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -370,6 +370,8 @@ MonoBehaviour:
   waypoint3Transform: {fileID: 0}
   observer: {fileID: 8363835582561914678}
   currentWaypoint: 0
+  destinationReachedThreshold: 5
+  patrolReachedThreshold: 0.5
 --- !u!4 &8794979231383990222 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400006, guid: 563ac48ff656d49478fd93213f4c0eb8,

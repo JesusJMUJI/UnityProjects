@@ -8,12 +8,18 @@ public class WaypointControl : MonoBehaviour
     public NavMeshAgent agent;
     public Transform[] waypoints;
 
-    [SerializeField] private bool isChaserGhost;
     public Transform playerTransform;
     public Transform waypoint3Transform;
     public Observer observer;
 
     [SerializeField] int currentWaypoint = 0;
+
+    [SerializeField] private bool isChaserGhost;
+    [Header("Chase Settings")]
+    [SerializeField] private float destinationReachedThreshold = 1f;
+    [Tooltip("Distance in meters to consider the ghost has reached its destination")]
+    [Range(0.1f, 5f)]
+    [SerializeField] private float patrolReachedThreshold = 0.5f;
 
     void Start()
     {
@@ -22,26 +28,19 @@ public class WaypointControl : MonoBehaviour
 
     void Update()
     {
-        Debug.Log($"Remaining distance: {agent.remainingDistance}");
+        // Debug.Log($"Remaining distance: {agent.remainingDistance}");
         if(isChaserGhost)
-        {
             ChaserGhost();
-        }
         else
-        {
             Patroller();
-        }
     }
 
     void ChaserGhost()
     {
-        if(agent.pathPending || agent.remainingDistance > 1f)
-        {
-            return;
-        }
+        // Skip if still moving towards destination
+        if (agent.pathPending || agent.remainingDistance > destinationReachedThreshold) return;
 
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(playerTransform.position, out hit, 10.0f, NavMesh.AllAreas))
+        if (!SafeZoneManager.Instance.ReturnIsSafe())
         {
             observer.transform.gameObject.SetActive(true);
             agent.SetDestination(playerTransform.position);
@@ -55,7 +54,7 @@ public class WaypointControl : MonoBehaviour
 
     void Patroller()
     {
-        if(agent.remainingDistance < agent.stoppingDistance)
+        if (agent.remainingDistance < patrolReachedThreshold)
         {
             currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
             agent.SetDestination(waypoints[currentWaypoint].position);

@@ -5,11 +5,9 @@ using UnityEngine;
 public class ChaserGhostSpawner : MonoBehaviour
 {
     public GameObject chaserGhostPrefab;
-    public Transform playerTransform;
     public Transform waypoint3Transform;
-    public Observer observer;
-
-    private GameObject chaserGhost;
+    public Transform playerTransform;
+    public GameEnding gameEnding;
 
     void Start()
     {
@@ -20,11 +18,22 @@ public class ChaserGhostSpawner : MonoBehaviour
     {
         while (true)
         {
-            chaserGhost = Instantiate(chaserGhostPrefab, waypoint3Transform.position, Quaternion.identity);
-            chaserGhost.GetComponent<WaypointControl>().playerTransform = playerTransform;
-            chaserGhost.GetComponent<WaypointControl>().waypoint3Transform = waypoint3Transform;
-            chaserGhost.GetComponent<WaypointControl>().observer = observer;
-            yield return new WaitForSeconds(1f);
+            while (true)
+            {
+                GameObject spawnedGhost = Instantiate(chaserGhostPrefab, waypoint3Transform.position, Quaternion.identity);
+
+                // Setup WaypointControl
+                WaypointControl waypointControl = spawnedGhost.GetComponent<WaypointControl>();
+                waypointControl.playerTransform = playerTransform;
+                waypointControl.waypoint3Transform = waypoint3Transform;
+
+                // Setup Observer
+                Observer observer = spawnedGhost.GetComponentInChildren<Observer>();
+                observer.player = playerTransform;
+                observer.gameEnding = gameEnding;
+
+                yield return new WaitForSeconds(1f);
+            }
         }
     }
 }
