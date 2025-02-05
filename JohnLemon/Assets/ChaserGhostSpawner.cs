@@ -18,22 +18,19 @@ public class ChaserGhostSpawner : MonoBehaviour
     {
         while (true)
         {
-            while (true)
-            {
-                GameObject spawnedGhost = Instantiate(chaserGhostPrefab, waypoint3Transform.position, Quaternion.identity);
+            GameObject spawnedGhost = Instantiate(chaserGhostPrefab, waypoint3Transform.position, Quaternion.identity);
 
-                // Setup WaypointControl
-                WaypointControl waypointControl = spawnedGhost.GetComponent<WaypointControl>();
-                waypointControl.playerTransform = playerTransform;
-                waypointControl.waypoint3Transform = waypoint3Transform;
+            // Setup WaypointControl
+            WaypointControl waypointControl = spawnedGhost.GetComponent<WaypointControl>();
+            waypointControl.playerTransform = playerTransform;
+            waypointControl.waypoint3Transform = waypoint3Transform;
 
-                // Setup Observer
-                Observer observer = spawnedGhost.GetComponentInChildren<Observer>();
-                observer.player = playerTransform;
-                observer.gameEnding = gameEnding;
+            // Setup Observer
+            Observer observer = spawnedGhost.GetComponentInChildren<Observer>();
+            observer.player = playerTransform;
+            observer.gameEnding = gameEnding;
 
-                yield return new WaitForSeconds(1f);
-            }
+            yield return new WaitForSeconds(1f);
         }
     }
 }
