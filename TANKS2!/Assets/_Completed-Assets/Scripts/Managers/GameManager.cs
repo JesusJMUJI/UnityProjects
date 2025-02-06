@@ -15,6 +15,8 @@ namespace Complete
         public GameObject m_TankPrefab;             // Reference to the prefab the players will control.
         public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
 
+        public GameObject aiTankPrefab;             // Reference to the prefab the AI will control.
+        public AiTankManager[] aiTanks;               // A collection of managers for enabling and disabling different aspects of the AI tanks.
 
         private int m_RoundNumber;                  // Which round the game is currently on.
         private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
@@ -29,6 +31,7 @@ namespace Complete
             m_StartWait = new WaitForSeconds (m_StartDelay);
             m_EndWait = new WaitForSeconds (m_EndDelay);
 
+            SpawnAiTank();
             SpawnAllTanks();
             SetCameraTargets();
 
@@ -36,7 +39,14 @@ namespace Complete
             StartCoroutine (GameLoop ());
         }
 
-
+        void SpawnAiTank()
+        {
+            for (int i = 0; i < aiTanks.Length; i++)
+            {
+                aiTanks[i].m_Instance = Instantiate(aiTankPrefab, aiTanks[i].m_SpawnPoint.position, aiTanks[i].m_SpawnPoint.rotation) as GameObject;
+                aiTanks[i].Setup();
+            }
+        }
         private void SpawnAllTanks()
         {
             // For all the tanks...
@@ -53,17 +63,23 @@ namespace Complete
 
         private void SetCameraTargets()
         {
-            // Create a collection of transforms the same size as the number of tanks.
-            Transform[] targets = new Transform[m_Tanks.Length];
+// Create a collection of transforms the same size as the number of tanks and AI tanks combined.
+            Transform[] targets = new Transform[m_Tanks.Length + aiTanks.Length];
 
-            // For each of these transforms...
-            for (int i = 0; i < targets.Length; i++)
+// For each of these transforms...
+            for (int i = 0; i < m_Tanks.Length; i++)
             {
                 // ... set it to the appropriate tank transform.
                 targets[i] = m_Tanks[i].m_Instance.transform;
             }
 
-            // These are the targets the camera should follow.
+// Add AI tanks to the targets array.
+            for (int i = 0; i < aiTanks.Length; i++)
+            {
+                targets[m_Tanks.Length + i] = aiTanks[i].m_Instance.transform;
+            }
+
+// These are the targets the camera should follow.
             m_CameraControl.m_Targets = targets;
         }
 

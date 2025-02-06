@@ -81,7 +81,7 @@ namespace Complete
         }
 
 
-        private void Fire ()
+        internal void Fire ()
         {
             // Set the fired flag so only Fire is only called once.
             m_Fired = true;
