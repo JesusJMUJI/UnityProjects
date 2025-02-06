@@ -43,8 +43,32 @@ namespace Complete
         {
             for (int i = 0; i < aiTanks.Length; i++)
             {
-                aiTanks[i].m_Instance = Instantiate(aiTankPrefab, aiTanks[i].m_SpawnPoint.position, aiTanks[i].m_SpawnPoint.rotation) as GameObject;
+                // Instantiate AI tank
+                GameObject aiTankInstance = Instantiate(aiTankPrefab, aiTanks[i].m_SpawnPoint.position, aiTanks[i].m_SpawnPoint.rotation);
+                aiTanks[i].m_Instance = aiTankInstance;
+
+                // Set the layer to Players so it can be damaged
+                aiTankInstance.layer = LayerMask.NameToLayer("Players");
+
+                // Set up AI tank components
                 aiTanks[i].Setup();
+
+                // Ensure TankHealth component is present and configured
+                TankHealth aiHealth = aiTankInstance.GetComponent<TankHealth>();
+                if (aiHealth == null)
+                {
+                    aiHealth = aiTankInstance.AddComponent<TankHealth>();
+                }
+
+                // Configure proper explosion prefab
+                // aiHealth.m_ExplosionPrefab = m_Tanks[0].m_Instance.GetComponent<TankHealth>().m_ExplosionPrefab;
+
+                // Set starting health and UI components
+                aiHealth.m_StartingHealth = 100f;
+                aiHealth.m_Slider = aiTankInstance.GetComponentInChildren<Slider>();
+                aiHealth.m_FillImage = aiTankInstance.GetComponentInChildren<Image>();
+                aiHealth.m_FullHealthColor = Color.green;
+                aiHealth.m_ZeroHealthColor = Color.red;
             }
         }
         private void SpawnAllTanks()
@@ -178,17 +202,25 @@ namespace Complete
         {
             // Start the count of tanks left at zero.
             int numTanksLeft = 0;
+            int numAiTanksLeft = 0;
+            int numPlayerTanksLeft = 0;
 
-            // Go through all the tanks...
+            // Count player tanks
             for (int i = 0; i < m_Tanks.Length; i++)
             {
-                // ... and if they are active, increment the counter.
                 if (m_Tanks[i].m_Instance.activeSelf)
-                    numTanksLeft++;
+                    numPlayerTanksLeft++;
             }
 
-            // If there are one or fewer tanks remaining return true, otherwise return false.
-            return numTanksLeft <= 1;
+            // Count AI tanks
+            for (int i = 0; i < aiTanks.Length; i++)
+            {
+                if (aiTanks[i].m_Instance.activeSelf)
+                    numAiTanksLeft++;
+            }
+
+            // Return true if either all players or all AI tanks are dead
+            return numPlayerTanksLeft == 0 || numAiTanksLeft == 0;
         }
 
 
@@ -196,15 +228,38 @@ namespace Complete
         // This function is called with the assumption that 1 or fewer tanks are currently active.
         private TankManager GetRoundWinner()
         {
-            // Go through all the tanks...
-            for (int i = 0; i < m_Tanks.Length; i++)
+            bool anyAiTankAlive = false;
+            bool anyPlayerTankAlive = false;
+
+            // Check AI tanks
+            for (int i = 0; i < aiTanks.Length; i++)
             {
-                // ... and if one of them is active, it is the winner so return it.
-                if (m_Tanks[i].m_Instance.activeSelf)
-                    return m_Tanks[i];
+                if (aiTanks[i].m_Instance.activeSelf)
+                {
+                    anyAiTankAlive = true;
+                    break;
+                }
             }
 
-            // If none of the tanks are active it is a draw so return null.
+            // Check player tanks
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                if (m_Tanks[i].m_Instance.activeSelf)
+                {
+                    anyPlayerTankAlive = true;
+                    // If AI is dead and this player is alive, they are the winner
+                    if (!anyAiTankAlive)
+                        return m_Tanks[i];
+                }
+            }
+
+            // If AI is alive and all players are dead, AI wins
+            if (anyAiTankAlive && !anyPlayerTankAlive)
+            {
+                // Since AiTankManager inherits from TankManager, this is now valid
+                return aiTanks[0];
+            }
+
             return null;
         }
 
@@ -259,6 +314,10 @@ namespace Complete
             {
                 m_Tanks[i].Reset();
             }
+            for (int i = 0; i < aiTanks.Length; i++)
+            {
+                aiTanks[i].Reset();
+            }
         }
 
 
@@ -267,6 +326,11 @@ namespace Complete
             for (int i = 0; i < m_Tanks.Length; i++)
             {
                 m_Tanks[i].EnableControl();
+            }
+
+            for (int i = 0; i < aiTanks.Length; i++)
+            {
+                aiTanks[i].EnableControl();
             }
         }
 
@@ -277,6 +341,12 @@ namespace Complete
             {
                 m_Tanks[i].DisableControl();
             }
+
+            for (int i = 0; i < aiTanks.Length; i++)
+            {
+                aiTanks[i].DisableControl();
+            }
+
         }
     }
 }
